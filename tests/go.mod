@@ -9,4 +9,3 @@ require (
 	github.com/tinywasm/svg v0.0.0
 )
 
-replace github.com/tinywasm/svg => ../
