@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	"github.com/tinywasm/dom"
-	. "github.com/tinywasm/html"
-	. "github.com/tinywasm/svg"
 	"github.com/tinywasm/fmt"
+	. "github.com/tinywasm/html"
+	"github.com/tinywasm/svg"
 )
 
 type SearchOption struct {
@@ -48,7 +48,7 @@ func (c *SelectSearch) Render() *dom.Element {
 		For(toggle).
 		Class("ss-header").
 		Text(headerText).
-		Add(Svg(Use().Attr("href", "#ss-arrow-down")).Class("ss-icon"))
+		Add(svg.Svg(svg.Use().Attr("href", "#ss-arrow-down")).Class("ss-icon"))
 
 	search := Input("search").
 		ID("ss-search-id").
