@@ -1,6 +1,11 @@
 package svg
 
-import "github.com/tinywasm/fmt"
+import (
+	"encoding/json"
+	"errors"
+
+	"github.com/tinywasm/fmt"
+)
 
 // Sprite holds SVG icon definitions for server-side sprite sheet injection.
 // Build with New() and chain Add() calls.
@@ -65,4 +70,37 @@ func (s *Sprite) String() string {
 	}
 	b.WriteString(`</svg>`)
 	return b.String()
+}
+
+// jsonIcon is the serializable form of an icon (exported fields).
+type jsonIcon struct {
+	ID      string `json:"id"`
+	Content string `json:"content"`
+	ViewBox string `json:"viewBox"`
+}
+
+func (s *Sprite) MarshalJSON() ([]byte, error) {
+	if s == nil {
+		return []byte("null"), nil
+	}
+	out := make([]jsonIcon, len(s.icons))
+	for i, e := range s.icons {
+		out[i] = jsonIcon{ID: e.id, Content: e.content, ViewBox: e.viewBox}
+	}
+	return json.Marshal(out)
+}
+
+func (s *Sprite) UnmarshalJSON(b []byte) error {
+	if s == nil {
+		return errors.New("cannot unmarshal into nil *Sprite")
+	}
+	var in []jsonIcon
+	if err := json.Unmarshal(b, &in); err != nil {
+		return err
+	}
+	s.icons = make([]iconEntry, len(in))
+	for i, e := range in {
+		s.icons[i] = iconEntry{id: e.ID, content: e.Content, viewBox: e.ViewBox}
+	}
+	return nil
 }
