@@ -1,4 +1,5 @@
-# svg
+# tinywasm/svg
+<img src="docs/img/badges.svg">
 
 SVG icon sprite API for TinyWasm — typed, zero-typo icon definitions.
 
