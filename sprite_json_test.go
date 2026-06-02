@@ -8,16 +8,17 @@ import (
 )
 
 func TestSprite_JSONRoundTrip(t *testing.T) {
-	original := svg.New().
-		Add("home", `<path d="M1 1"/>`, "0 0 24 24").
-		Add("rect", `<rect x="0" y="0" width="10" height="10"/>`)
+	original := svg.NewSprite(
+		svg.Define("home", "0 0 24 24", svg.Path("M1 1")),
+		svg.Define("rect", "0 0 16 16", svg.Raw(`<rect x="0" y="0" width="10" height="10"/>`)),
+	)
 
 	data, err := json.Marshal(original)
 	if err != nil {
 		t.Fatalf("Marshal failed: %v", err)
 	}
 
-	recovered := svg.New()
+	recovered := &svg.Sprite{}
 	if err := json.Unmarshal(data, recovered); err != nil {
 		t.Fatalf("Unmarshal failed: %v", err)
 	}
@@ -28,7 +29,7 @@ func TestSprite_JSONRoundTrip(t *testing.T) {
 }
 
 func TestSprite_JSONEmpty(t *testing.T) {
-	s := svg.New()
+	s := &svg.Sprite{}
 	data, err := json.Marshal(s)
 	if err != nil {
 		t.Fatalf("Marshal failed: %v", err)
@@ -37,7 +38,7 @@ func TestSprite_JSONEmpty(t *testing.T) {
 		t.Errorf("Expected empty array [], got %s", string(data))
 	}
 
-	recovered := svg.New()
+	recovered := &svg.Sprite{}
 	if err := json.Unmarshal(data, recovered); err != nil {
 		t.Fatalf("Unmarshal failed: %v", err)
 	}

@@ -2,13 +2,11 @@ package svg
 
 import (
 	"encoding/json"
-	"errors"
 
 	"github.com/tinywasm/fmt"
 )
 
 // Sprite holds SVG icon definitions for server-side sprite sheet injection.
-// Build with New() and chain Add() calls.
 // assetmin injects Sprite.String() inline at the top of <body>.
 type Sprite struct {
 	icons []iconEntry
@@ -18,24 +16,6 @@ type iconEntry struct {
 	id      string
 	content string // inner SVG content: <path fill="currentColor" d="..."/>
 	viewBox string // e.g. "0 0 16 16"
-}
-
-// New creates an empty Sprite.
-func New() *Sprite {
-	return &Sprite{}
-}
-
-// Add registers an icon.
-// id: referenced in Icon("id") and <use href="#id">
-// content: inner SVG (NOT the wrapping <svg> tag) — must use fill="currentColor"
-// viewBox: optional, defaults to "0 0 16 16"
-func (s *Sprite) Add(id, content string, viewBox ...string) *Sprite {
-	vb := "0 0 16 16"
-	if len(viewBox) > 0 && viewBox[0] != "" {
-		vb = viewBox[0]
-	}
-	s.icons = append(s.icons, iconEntry{id: id, content: content, viewBox: vb})
-	return s
 }
 
 // Merge adds all icons from other into s.
@@ -92,7 +72,7 @@ func (s *Sprite) MarshalJSON() ([]byte, error) {
 
 func (s *Sprite) UnmarshalJSON(b []byte) error {
 	if s == nil {
-		return errors.New("cannot unmarshal into nil *Sprite")
+		return fmt.Err("cannot unmarshal into nil *Sprite")
 	}
 	var in []jsonIcon
 	if err := json.Unmarshal(b, &in); err != nil {

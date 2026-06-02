@@ -70,17 +70,19 @@ Rule(Selector(".pd-nav-active svg"), Color(tokenColorPrimary)),   // activo → 
 ```go
 package svg
 
-// Node es markup interno tipado del cuerpo de un símbolo.
-type Node string
+// node es markup interno del cuerpo de un símbolo — privado a propósito.
+// Los callers nunca nombran el tipo; solo pasan svg.Path(...) o svg.Raw(...)
+// directamente a Define. La superficie pública queda en lo mínimo necesario.
+type node string
 
 // Path renderiza <path fill="currentColor" d="<d>"/>. El fill queda fijo en
 // currentColor (infalible: nadie puede olvidarlo → ningún icono negro/invisible).
 // Cubre el caso común: uno o varios vector paths.
-func Path(d string) Node
+func Path(d string) node
 
 // Raw es el escape hatch para markup que Path no expresa (groups, circle, mask,
 // gradientes). El autor decide dónde usar fill="currentColor" si quiere theming.
-func Raw(s string) Node
+func Raw(s string) node
 
 // Icon es una definición de icono tipada y autocontenida: id + viewBox + cuerpo,
 // declarada UNA sola vez en el svg.go del proyecto. El mismo valor construye el
@@ -93,8 +95,8 @@ type Icon struct {
 }
 
 // Define crea un icono reutilizable. viewBox es OBLIGATORIO (sin default que
-// recorte paths). body son uno o más Node tipados (Path/Raw).
-func Define(id, viewBox string, body ...Node) Icon
+// recorte paths). body son uno o más node (Path/Raw).
+func Define(id, viewBox string, body ...node) Icon Icon
 
 // ID devuelve el id del símbolo (para <use href="#id">).
 func (i Icon) ID() string
@@ -167,23 +169,25 @@ si `clsNavIcon` se renombra en el CSS, el compilador avisa acá también.
 `Sprite` mantiene su representación interna (`iconEntry{id, content, viewBox}`) y
 sus métodos `String()`, `MarshalJSON`/`UnmarshalJSON` y `Merge()` **sin cambios** —
 assetmin sigue inyectando `Sprite.String()` inline en `<body>` y serializando por
-JSON durante la extracción SSR. `Define` y `NewSprite` solo construyen esa misma
-data con seguridad en compilación.
+JSON durante la extracción SSR. `NewSprite` construye esa misma data con seguridad
+en compilación.
 
-`Path(d)` produce exactamente `<path fill="currentColor" d="...">`, idéntico al
-markup que hoy se escribe a mano → el sprite resultante es byte-compatible.
+`Path(d)` produce exactamente `<path fill="currentColor" d="...">` — el sprite
+resultante es byte-equivalent al markup anterior.
 
 ---
 
-## Migración (deprecación gradual)
+## Migración (break change limpio)
 
 1. Agregar `Node`, `Path`, `Raw`, `Icon`, `Define`, `(Icon).ID/Render`, `NewSprite`
    en `tinywasm/svg`.
-2. Marcar `Sprite.Add(...)` y la función libre `Icon(id, classes...)` como
-   `Deprecated:` (siguen funcionando para no romper consumidores).
+2. **Eliminar** `New()`, `Sprite.Add(id, content, viewBox string)` y la función
+   libre `Icon(id string, classes ...string)` — sin `Deprecated:`, sin código legacy.
+   `NewSprite(icons ...Icon)` es el único constructor; su nombre dice exactamente qué crea.
 3. Migrar `tinywasm/layout/platformd/svg.go` a vars tipadas + `svg.NewSprite(...)` y
-   `platformd.go` Render a `iconX.Render("pd-nav-icon")`.
-4. Una vez migrados los consumidores, eliminar `Add`/`Icon(string,...)`.
+   `platformd.go` Render a `iconX.Render(string(clsNavIcon))`.
+4. Bump de versión minor en `tinywasm/svg` — los consumidores que usen la API antigua
+   no compilarán; deben migrar al mismo tiempo.
 
 ---
 
@@ -195,6 +199,16 @@ markup que hoy se escribe a mano → el sprite resultante es byte-compatible.
 - `NewSprite(icons...).String()` es byte-compatible con el `New().Add(...)` equivalente
   (guard de no-regresión para assetmin).
 - Typo safety es de compilación — no requiere test.
+
+---
+
+## Documentación
+
+Actualizar `tinywasm/svg/README.md`:
+- Eliminar ejemplos con `New().Add(...)` y `svg.Icon(string,...)`
+- Mostrar el patrón completo: `Define` + `Path`/`Raw` + `NewSprite` + `Render`
+- Incluir el ejemplo de dos archivos (`svg.go` con build tag `!wasm` + referencia en `Render()`)
+- Sección de color: por qué `currentColor` vive en el símbolo y el theming va en CSS
 
 ---
 
