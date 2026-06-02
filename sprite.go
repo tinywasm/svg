@@ -8,7 +8,7 @@ import (
 )
 
 // Sprite holds SVG icon definitions for server-side sprite sheet injection.
-// Build with New() and chain Add() calls.
+// Build with NewSprite() or New().
 // assetmin injects Sprite.String() inline at the top of <body>.
 type Sprite struct {
 	icons []iconEntry
@@ -25,10 +25,25 @@ func New() *Sprite {
 	return &Sprite{}
 }
 
+// NewSprite constructs a *Sprite from typed icons.
+func NewSprite(icons ...Icon) *Sprite {
+	s := New()
+	for _, i := range icons {
+		s.icons = append(s.icons, iconEntry{
+			id:      i.id,
+			content: i.body,
+			viewBox: i.viewBox,
+		})
+	}
+	return s
+}
+
 // Add registers an icon.
-// id: referenced in Icon("id") and <use href="#id">
+// id: referenced in <use href="#id">
 // content: inner SVG (NOT the wrapping <svg> tag) — must use fill="currentColor"
 // viewBox: optional, defaults to "0 0 16 16"
+//
+// Deprecated: use NewSprite with Icon definitions instead.
 func (s *Sprite) Add(id, content string, viewBox ...string) *Sprite {
 	vb := "0 0 16 16"
 	if len(viewBox) > 0 && viewBox[0] != "" {

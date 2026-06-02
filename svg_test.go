@@ -7,8 +7,8 @@ import (
 	. "github.com/tinywasm/svg"
 )
 
-func TestIcon_Structure(t *testing.T) {
-	got := Icon("home", "nav-icon").String()
+func TestIconLegacy_Structure(t *testing.T) {
+	got := IconLegacy("home", "nav-icon").String()
 	if !strings.Contains(got, `href='#home'`) {
 		t.Error("expected href")
 	}
@@ -34,6 +34,53 @@ func TestSprite_String(t *testing.T) {
 	}
 	if !strings.Contains(out, `viewBox="0 0 16 16"`) {
 		t.Error("expected default viewBox")
+	}
+}
+
+func TestPath(t *testing.T) {
+	got := string(Path("M1 1"))
+	want := `<path fill="currentColor" d="M1 1"/>`
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestIcon_Render(t *testing.T) {
+	icon := Define("home", "0 0 20 20", Path("M1 1"))
+	if icon.ID() != "home" {
+		t.Errorf("expected ID home, got %s", icon.ID())
+	}
+
+	got := icon.Render("custom-class").String()
+	if !strings.Contains(got, `href='#home'`) {
+		t.Error("expected href")
+	}
+	if !strings.Contains(got, `class='custom-class'`) {
+		t.Error("expected class")
+	}
+}
+
+func TestNewSprite(t *testing.T) {
+	iconHome := Define("home", "0 0 576 512", Path("M1 1"))
+	iconInfo := Define("info", "0 0 16 16", Path("m7 11h2v2h-2z"))
+
+	s := NewSprite(iconHome, iconInfo)
+	out := s.String()
+
+	if !strings.Contains(out, `id="home"`) {
+		t.Error("expected home symbol")
+	}
+	if !strings.Contains(out, `viewBox="0 0 576 512"`) {
+		t.Error("expected custom viewBox")
+	}
+	if !strings.Contains(out, `id="info"`) {
+		t.Error("expected info symbol")
+	}
+	if !strings.Contains(out, `viewBox="0 0 16 16"`) {
+		t.Error("expected info viewBox")
+	}
+	if !strings.Contains(out, `fill="currentColor"`) {
+		t.Error("expected currentColor in body")
 	}
 }
 
