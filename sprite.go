@@ -18,6 +18,17 @@ type iconEntry struct {
 	viewBox string // e.g. "0 0 16 16"
 }
 
+// AddRaw adds a raw icon entry. Internal use only (assetmin compatibility).
+// Prefer Define() + NewSprite() for new code.
+func (s *Sprite) AddRaw(id, content string, viewBox ...string) *Sprite {
+	vb := "0 0 16 16"
+	if len(viewBox) > 0 && viewBox[0] != "" {
+		vb = viewBox[0]
+	}
+	s.icons = append(s.icons, iconEntry{id: id, content: content, viewBox: vb})
+	return s
+}
+
 // Merge adds all icons from other into s.
 // Used by assetmin to accumulate icons from multiple components into one master sprite.
 func (s *Sprite) Merge(other *Sprite) *Sprite {
