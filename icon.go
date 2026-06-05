@@ -38,12 +38,16 @@ func (i Icon) ID() string {
 
 // Render emite <svg aria-hidden focusable=false class=...><use href="#id"/></svg>.
 func (i Icon) Render(classes ...string) *dom.Element {
-	el := Svg(
-		Use().Attr("href", "#"+i.id),
-	).Attr("aria-hidden", "true").Attr("focusable", "false")
-	for _, c := range classes {
-		el.Class(c)
+	el := dom.NewElement("svg").
+		Attr("aria-hidden", "true").
+		Attr("focusable", "false").
+		Add(Use().Attr("href", "#"+i.id))
+
+	// Agregar clases si existen
+	for _, className := range classes {
+		el.Class(className)
 	}
+
 	return el
 }
 
