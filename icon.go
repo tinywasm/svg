@@ -41,7 +41,7 @@ func (i Icon) Render(classes ...string) *dom.Element {
 	el := dom.NewElement("svg").
 		Attr("aria-hidden", "true").
 		Attr("focusable", "false").
-		Add(Use().Attr("href", "#"+i.id))
+		Child(Use().Attr("href", "#"+i.id))
 
 	// Agregar clases si existen
 	for _, className := range classes {

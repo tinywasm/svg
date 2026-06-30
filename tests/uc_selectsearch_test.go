@@ -25,42 +25,24 @@ type SelectSearch struct {
 	OnSelect    func(id, description string)
 	OnSearch    func(term string) []SearchOption
 
-	selectedLabel string
-	filterTerm    string
-	isOpen        bool
+	selectedLabel *dom.SignalString
+	filterTerm    *dom.SignalString
+	isOpen        *dom.SignalBool
+	optionNodes   *dom.SignalNodes
 }
 
-func (c *SelectSearch) Render() *dom.Element {
-	headerText := c.Placeholder
-	if c.selectedLabel != "" {
-		headerText = c.selectedLabel
-	}
-	if headerText == "" {
-		headerText = "Select..."
-	}
+func (c *SelectSearch) Init(ctx dom.Ctx) {
+	c.selectedLabel = dom.NewString("")
+	c.filterTerm = dom.NewString("")
+	c.isOpen = dom.NewBool(false)
+	c.optionNodes = dom.NewNodes(c.buildOptionNodes()...)
+}
 
-	toggle := Input("checkbox").Class("ss-toggle").ID("ss-toggle-id")
-	if c.isOpen {
-		toggle.Attr("checked", "")
-	}
-
-	header := Label().
-		For(toggle).
-		Class("ss-header").
-		Text(headerText).
-		Add(svg.Svg(svg.Use().Attr("href", "#ss-arrow-down")).Class("ss-icon"))
-
-	search := Input("search").
-		ID("ss-search-id").
-		Class("ss-search").
-		Attr("placeholder", "Search...").
-		Attr("value", c.filterTerm).
-		On("input", c.onSearchInput)
-
-	list := Div().Class("ss-options")
-	filterTerm := fmt.Convert(c.filterTerm).ToLower().String()
+func (c *SelectSearch) buildOptionNodes() []*dom.Element {
+	term := fmt.Convert(c.filterTerm.Get()).ToLower().String()
+	var nodes []*dom.Element
 	for _, opt := range c.Options {
-		if !c.matches(opt, filterTerm) {
+		if !c.matches(opt, term) {
 			continue
 		}
 		opt := opt
@@ -68,36 +50,64 @@ func (c *SelectSearch) Render() *dom.Element {
 			ID("ss-opt-"+opt.ID).
 			Attr("data-id", opt.ID).
 			On("click", func(e dom.Event) { c.selectOption(opt) }).
-			Add(Span().Class("ss-label").Text(opt.Label))
+			Child(Span().Class("ss-label").Text(opt.Label))
 		if opt.Description != "" {
-			item.Add(Span().Class("ss-desc").Text(opt.Description))
+			item.Child(Span().Class("ss-desc").Text(opt.Description))
 		}
-		list.Add(item)
+		nodes = append(nodes, item)
 	}
+	return nodes
+}
 
-	return Div().Class("ss-box").
-		Add(toggle).
-		Add(header).
-		Add(Div().Class("ss-dropdown").
-			Add(search).
-			Add(list))
+func (c *SelectSearch) Render() *dom.Element {
+	headerText := dom.DeriveString(func() string {
+		if sel := c.selectedLabel.Get(); sel != "" {
+			return sel
+		}
+		if c.Placeholder != "" {
+			return c.Placeholder
+		}
+		return "Select..."
+	})
+
+	toggle := Input("checkbox").Class("ss-toggle").ID("ss-toggle-id").
+		BindAttrBool("checked", c.isOpen)
+
+	header := Label().For(toggle).Class("ss-header").Child(
+		Span().BindText(headerText),
+		svg.Svg().Child(svg.Use().Attr("href", "#ss-arrow-down")).Class("ss-icon"),
+	)
+
+	search := Input("search").
+		ID("ss-search-id").
+		Class("ss-search").
+		Attr("placeholder", "Search...").
+		BindAttr("value", c.filterTerm).
+		On("input", c.onSearchInput)
+
+	list := Div().Class("ss-options").ID("ss-options").BindChildren(c.optionNodes)
+
+	return Div().Class("ss-box").Child(
+		toggle,
+		header,
+		Div().Class("ss-dropdown").Child(search, list),
+	)
 }
 
 func (c *SelectSearch) onSearchInput(e dom.Event) {
-	c.filterTerm = e.TargetValue()
+	c.filterTerm.Set(e.TargetValue())
 	if len(c.filteredOptions()) == 0 && c.OnSearch != nil {
-		c.Options = c.OnSearch(c.filterTerm)
+		c.Options = c.OnSearch(c.filterTerm.Get())
 	}
-	c.Update()
+	c.optionNodes.Set(c.buildOptionNodes())
 }
 
 func (c *SelectSearch) selectOption(opt SearchOption) {
-	c.selectedLabel = opt.Label
-	c.isOpen = false
+	c.selectedLabel.Set(opt.Label)
+	c.isOpen.Set(false)
 	if c.OnSelect != nil {
 		c.OnSelect(opt.ID, opt.Description)
 	}
-	c.Update()
 }
 
 func (c *SelectSearch) matches(opt SearchOption, term string) bool {
@@ -109,7 +119,7 @@ func (c *SelectSearch) matches(opt SearchOption, term string) bool {
 }
 
 func (c *SelectSearch) filteredOptions() []SearchOption {
-	term := fmt.Convert(c.filterTerm).ToLower().String()
+	term := fmt.Convert(c.filterTerm.Get()).ToLower().String()
 	out := make([]SearchOption, 0, len(c.Options))
 	for _, o := range c.Options {
 		if c.matches(o, term) {
@@ -144,8 +154,8 @@ func TestSelectSearch(t *testing.T) {
 	}
 
 	TriggerEvent("ss-search-id", "input", "Option 2")
-	if c.filterTerm != "Option 2" {
-		t.Errorf("expected filterTerm='Option 2', got %q", c.filterTerm)
+	if c.filterTerm.Get() != "Option 2" {
+		t.Errorf("expected filterTerm='Option 2', got %q", c.filterTerm.Get())
 	}
 
 	_, ok = GetRef("ss-opt-opt1")
@@ -157,7 +167,7 @@ func TestSelectSearch(t *testing.T) {
 	if selectedID != "opt2" {
 		t.Errorf("expected selectedID='opt2', got %q", selectedID)
 	}
-	if c.selectedLabel != "Option 2" {
-		t.Errorf("expected selectedLabel='Option 2', got %q", c.selectedLabel)
+	if c.selectedLabel.Get() != "Option 2" {
+		t.Errorf("expected selectedLabel='Option 2', got %q", c.selectedLabel.Get())
 	}
 }
