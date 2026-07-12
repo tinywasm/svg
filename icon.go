@@ -1,65 +1,28 @@
 package svg
 
-import "github.com/tinywasm/dom"
+import (
+	"github.com/tinywasm/dom"
+)
 
-// node es markup interno del cuerpo de un símbolo.
-type node string
+// Icon is a typed icon reference (the symbol ID).
+// Reference (shared, any target): Only the ID string reaches the WASM binary.
+type Icon string
 
-// Path renderiza <path fill="currentColor" d="<d>"/>.
-func Path(d string) node {
-	return node(`<path fill="currentColor" d="` + d + `"/>`)
-}
-
-// Raw es el escape hatch para markup que Path no expresa.
-func Raw(s string) node {
-	return node(s)
-}
-
-// Icon es una definición tipada de icono: id + viewBox + cuerpo.
-type Icon struct {
-	id      string
-	viewBox string
-	body    string
-}
-
-// Define crea un icono reutilizable.
-func Define(id, viewBox string, body ...node) Icon {
-	var content string
-	for _, n := range body {
-		content += string(n)
-	}
-	return Icon{id: id, viewBox: viewBox, body: content}
-}
-
-// ID devuelve el id del símbolo.
+// ID returns the symbol's ID.
 func (i Icon) ID() string {
-	return i.id
+	return string(i)
 }
 
-// Render emite <svg aria-hidden focusable=false class=...><use href="#id"/></svg>.
+// Render returns <svg aria-hidden='true' focusable='false' class=...><use href="#id"/></svg>.
+// It is the ONLY public path to <svg><use>.
 func (i Icon) Render(classes ...string) *dom.Element {
 	el := dom.NewElement("svg").
 		Attr("aria-hidden", "true").
 		Attr("focusable", "false").
-		Child(Use().Attr("href", "#"+i.id))
+		Child(dom.NewElement("use").Attr("href", "#"+string(i)))
 
-	// Agregar clases si existen
-	for _, className := range classes {
-		el.Class(className)
+	for _, c := range classes {
+		el.Class(c)
 	}
-
 	return el
-}
-
-// NewSprite construye un *Sprite a partir de iconos tipados.
-func NewSprite(icons ...Icon) *Sprite {
-	s := &Sprite{}
-	for _, icon := range icons {
-		s.icons = append(s.icons, iconEntry{
-			id:      icon.id,
-			content: icon.body,
-			viewBox: icon.viewBox,
-		})
-	}
-	return s
 }

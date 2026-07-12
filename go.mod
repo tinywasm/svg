@@ -3,7 +3,9 @@ module github.com/tinywasm/svg
 go 1.25.2
 
 require (
-	github.com/tinywasm/dom v0.11.0
-	github.com/tinywasm/fmt v0.24.5
-	github.com/tinywasm/html v0.0.5
+	github.com/tinywasm/dom v0.11.2
+	github.com/tinywasm/json v0.5.10
+	github.com/tinywasm/model v0.0.8
 )
+
+require github.com/tinywasm/fmt v0.25.2 // indirect
