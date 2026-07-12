@@ -24,7 +24,7 @@ decides what to import, and tags its OWN files.
 | Package | Contains | Who imports it |
 |---|---|---|
 | `github.com/tinywasm/svg` | `type Icon string` + `Render()`. Imports only `tinywasm/dom`. | Everyone — reachable from WASM |
-| `github.com/tinywasm/svg/sprite` | `Define`, `Sprite`, `Path`, `Raw`, `NewSprite`, `SvgProvider`, JSON (de)serialization. Imports `svg` + `github.com/tinywasm/json` + `github.com/tinywasm/model`. | Backend-only: a consumer's tagged `svg.go`, `tinywasm/ssr`, `assetmin` |
+| `github.com/tinywasm/svg/sprite` | `Define`, `Sprite`, `Path`, `Raw`, `NewSprite`, `AddRaw`, `AddFile`, JSON (de)serialization. Imports `svg` + `github.com/tinywasm/json` + `github.com/tinywasm/model`. | Backend-only: a consumer's tagged `svg.go`, `tinywasm/ssr`, `assetmin` |
 
 Never move `sprite`'s declarations into the root `svg` package, and never make
 the root package depend on `sprite` (dependency points one way: `sprite` →
@@ -79,9 +79,14 @@ library's, but it is the number one mistake this design is vulnerable to.
 - No `map`, no generics, no `any`. Value semantics; unexported struct fields.
 - `Path(d)` hardcodes `fill="currentColor"` — icons are color-agnostic; theming
   happens in CSS at the use-site. Never emit fixed colors.
-- `viewBox` is a mandatory `Define` parameter — no implicit default.
-- `AddRaw` exists for assetmin's raw `.svg` file/favicon path only; it is not
-  the consumer API.
+- `viewBox` is mandatory everywhere (`Define`, `AddRaw`, `AddFile`) — no implicit
+  default. A symbol rendered in a box it was not drawn for is clipped or
+  misaligned, and no default can recover the source coordinate system.
+- `AddRaw` (body + explicit viewBox) and `AddFile` (a whole `.svg` file, viewBox
+  parsed from its root element) exist for assetmin's raw file/favicon path only;
+  they are not the consumer API. Parsing SVG markup belongs HERE, never in
+  assetmin — assetmin bundles assets, it does not know the SVG format.
+- No `regexp` and no stdlib in the file parser (`file.go`): plain byte scanning.
 
 ## Testing / publishing
 
