@@ -48,7 +48,7 @@ func (c *SelectSearch) Render() *dom.Element {
 		For(toggle).
 		Class("ss-header").
 		Text(headerText).
-		Add(svg.Svg(svg.Use().Attr("href", "#ss-arrow-down")).Class("ss-icon"))
+		Child(svg.Svg(svg.Use().Attr("href", "#ss-arrow-down")).Class("ss-icon"))
 
 	search := Input("search").
 		ID("ss-search-id").
@@ -68,19 +68,19 @@ func (c *SelectSearch) Render() *dom.Element {
 			ID("ss-opt-"+opt.ID).
 			Attr("data-id", opt.ID).
 			On("click", func(e dom.Event) { c.selectOption(opt) }).
-			Add(Span().Class("ss-label").Text(opt.Label))
+			Child(Span().Class("ss-label").Text(opt.Label))
 		if opt.Description != "" {
-			item.Add(Span().Class("ss-desc").Text(opt.Description))
+			item.Child(Span().Class("ss-desc").Text(opt.Description))
 		}
-		list.Add(item)
+		list.Child(item)
 	}
 
 	return Div().Class("ss-box").
-		Add(toggle).
-		Add(header).
-		Add(Div().Class("ss-dropdown").
-			Add(search).
-			Add(list))
+		Child(toggle).
+		Child(header).
+		Child(Div().Class("ss-dropdown").
+			Child(search).
+			Child(list))
 }
 
 func (c *SelectSearch) onSearchInput(e dom.Event) {
@@ -88,7 +88,6 @@ func (c *SelectSearch) onSearchInput(e dom.Event) {
 	if len(c.filteredOptions()) == 0 && c.OnSearch != nil {
 		c.Options = c.OnSearch(c.filterTerm)
 	}
-	c.Update()
 }
 
 func (c *SelectSearch) selectOption(opt SearchOption) {
@@ -97,7 +96,6 @@ func (c *SelectSearch) selectOption(opt SearchOption) {
 	if c.OnSelect != nil {
 		c.OnSelect(opt.ID, opt.Description)
 	}
-	c.Update()
 }
 
 func (c *SelectSearch) matches(opt SearchOption, term string) bool {

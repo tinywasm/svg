@@ -4,11 +4,12 @@ import (
 	"strings"
 	"testing"
 
-	. "github.com/tinywasm/svg"
+	"github.com/tinywasm/svg"
+	"github.com/tinywasm/svg/sprite"
 )
 
 func TestIconLegacy_Structure(t *testing.T) {
-	got := IconLegacy("home", "nav-icon").String()
+	got := svg.IconLegacy("home", "nav-icon").String()
 	if !strings.Contains(got, `href='#home'`) {
 		t.Error("expected href")
 	}
@@ -21,7 +22,7 @@ func TestIconLegacy_Structure(t *testing.T) {
 }
 
 func TestSprite_String(t *testing.T) {
-	s := New().
+	s := sprite.New().
 		Add("home", `<path fill="currentColor" d="M1 1"/>`, "0 0 576 512").
 		Add("info", `<path fill="currentColor" d="m7 11h2v2h-2z"/>`)
 
@@ -38,7 +39,7 @@ func TestSprite_String(t *testing.T) {
 }
 
 func TestPath(t *testing.T) {
-	got := string(Path("M1 1"))
+	got := string(sprite.Path("M1 1"))
 	want := `<path fill="currentColor" d="M1 1"/>`
 	if got != want {
 		t.Errorf("got %q, want %q", got, want)
@@ -46,12 +47,13 @@ func TestPath(t *testing.T) {
 }
 
 func TestIcon_Render(t *testing.T) {
-	icon := Define("home", "0 0 20 20", Path("M1 1"))
-	if icon.ID() != "home" {
-		t.Errorf("expected ID home, got %s", icon.ID())
+	iconID := svg.Icon("home")
+	_ = sprite.Define(iconID, "0 0 20 20", sprite.Path("M1 1"))
+	if iconID.ID() != "home" {
+		t.Errorf("expected ID home, got %s", iconID.ID())
 	}
 
-	got := icon.Render("custom-class").String()
+	got := iconID.Render("custom-class").String()
 	if !strings.Contains(got, `href='#home'`) {
 		t.Error("expected href")
 	}
@@ -61,10 +63,10 @@ func TestIcon_Render(t *testing.T) {
 }
 
 func TestNewSprite(t *testing.T) {
-	iconHome := Define("home", "0 0 576 512", Path("M1 1"))
-	iconInfo := Define("info", "0 0 16 16", Path("m7 11h2v2h-2z"))
+	iconHome := sprite.Define(svg.Icon("home"), "0 0 576 512", sprite.Path("M1 1"))
+	iconInfo := sprite.Define(svg.Icon("info"), "0 0 16 16", sprite.Path("m7 11h2v2h-2z"))
 
-	s := NewSprite(iconHome, iconInfo)
+	s := sprite.NewSprite(iconHome, iconInfo)
 	out := s.String()
 
 	if !strings.Contains(out, `id="home"`) {
@@ -85,8 +87,8 @@ func TestNewSprite(t *testing.T) {
 }
 
 func TestSprite_Merge(t *testing.T) {
-	a := New().Add("icon-a", "<path/>")
-	b := New().Add("icon-b", "<path/>")
+	a := sprite.New().Add("icon-a", "<path/>")
+	b := sprite.New().Add("icon-b", "<path/>")
 	a.Merge(b)
 	out := a.String()
 	if !strings.Contains(out, `id="icon-a"`) {
@@ -98,11 +100,11 @@ func TestSprite_Merge(t *testing.T) {
 }
 
 func TestSprite_Nil_Safe(t *testing.T) {
-	var s *Sprite
+	var s *sprite.Sprite
 	if s.String() != "" {
 		t.Fatal("nil Sprite.String() should be empty")
 	}
-	if s.Merge(New()) == nil {
+	if s.Merge(sprite.New()) == nil {
 		t.Fatal("nil Merge should not panic")
 	}
 }

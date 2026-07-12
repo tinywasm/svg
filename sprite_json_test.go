@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/tinywasm/svg"
+	"github.com/tinywasm/svg/sprite"
 )
 
 func TestSprite_JSONRoundTrip(t *testing.T) {
-	original := svg.New().
+	original := sprite.New().
 		Add("home", `<path d="M1 1"/>`, "0 0 24 24").
 		Add("rect", `<rect x="0" y="0" width="10" height="10"/>`)
 
@@ -17,7 +17,7 @@ func TestSprite_JSONRoundTrip(t *testing.T) {
 		t.Fatalf("Marshal failed: %v", err)
 	}
 
-	recovered := svg.New()
+	recovered := sprite.New()
 	if err := json.Unmarshal(data, recovered); err != nil {
 		t.Fatalf("Unmarshal failed: %v", err)
 	}
@@ -28,7 +28,7 @@ func TestSprite_JSONRoundTrip(t *testing.T) {
 }
 
 func TestSprite_JSONEmpty(t *testing.T) {
-	s := svg.New()
+	s := sprite.New()
 	data, err := json.Marshal(s)
 	if err != nil {
 		t.Fatalf("Marshal failed: %v", err)
@@ -37,7 +37,7 @@ func TestSprite_JSONEmpty(t *testing.T) {
 		t.Errorf("Expected empty array [], got %s", string(data))
 	}
 
-	recovered := svg.New()
+	recovered := sprite.New()
 	if err := json.Unmarshal(data, recovered); err != nil {
 		t.Fatalf("Unmarshal failed: %v", err)
 	}
@@ -47,7 +47,7 @@ func TestSprite_JSONEmpty(t *testing.T) {
 }
 
 func TestSprite_JSONNil(t *testing.T) {
-	var s *svg.Sprite
+	var s *sprite.Sprite
 	data, err := json.Marshal(s)
 	if err != nil {
 		t.Fatalf("Marshal failed: %v", err)
