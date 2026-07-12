@@ -31,6 +31,8 @@ type SelectSearch struct {
 	optionNodes   *dom.SignalNodes
 }
 
+const iconArrowDown = svg.Icon("ss-arrow-down")
+
 func (c *SelectSearch) Init(ctx dom.Ctx) {
 	c.selectedLabel = dom.NewString("")
 	c.filterTerm = dom.NewString("")
@@ -75,7 +77,7 @@ func (c *SelectSearch) Render() *dom.Element {
 
 	header := Label().For(toggle).Class("ss-header").Child(
 		Span().BindText(headerText),
-		svg.Svg().Child(svg.Use().Attr("href", "#ss-arrow-down")).Class("ss-icon"),
+		iconArrowDown.Render("ss-icon"),
 	)
 
 	search := Input("search").
