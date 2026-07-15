@@ -8,8 +8,8 @@ Constraints for agents modifying this library. Read before any change.
 
 This library is part of TinyWasm's **construction harness**: the typed,
 explicit API is what keeps an agent that doesn't know the library from building
-wrong code. (Ecosystem rationale: `tinywasm/docs/ARNES_DE_CONSTRUCCION.md` and
-`app-releases/docs/CONSTRUCTION_HARNESS.md`.)
+wrong code. (Ecosystem rationale: `tinywasm/app/docs/CONSTRUCTION_HARNESS.md` and
+`app/docs/CONSTRUCTION_HARNESS.md`.)
 
 **This library never uses `//go:build`.** It has two unconditional consumer
 classes — the WASM browser client, and backend-only programs (`tinywasm/ssr`'s
