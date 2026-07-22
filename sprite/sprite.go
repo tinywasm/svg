@@ -119,6 +119,18 @@ func (s *Sprite) UnmarshalJSON(b []byte) error {
 
 // FielderSlice implementation for root array
 
+// Icons returns a copy of the sprite's typed icon definitions. Callers that
+// need to inspect or recombine icons (e.g. assetmin merging per-module
+// sprites) read this instead of round-tripping through String().
+func (s *Sprite) Icons() []Definition {
+	if s == nil {
+		return nil
+	}
+	out := make([]Definition, len(s.icons))
+	copy(out, s.icons)
+	return out
+}
+
 func (s *Sprite) Len() int              { return len(s.icons) }
 func (s *Sprite) At(i int) model.Fielder {
 	return &iconFielder{icon: &s.icons[i]}
