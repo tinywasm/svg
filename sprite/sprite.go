@@ -63,22 +63,28 @@ func (s *Sprite) AddRaw(id, content, viewBox string) {
 	})
 }
 
-// Merge adds all icons from other into s.
+// Merge returns a NEW sprite holding s's icons followed by other's, keeping the
+// first occurrence of each ID. It never mutates s or other, and never returns a
+// pointer it was given: the caller always gets a sprite of its own.
+//
+// The previous version appended in place and returned `other` unchanged when the
+// receiver was nil. That aliased the first package's cached sprite, and the next
+// merge corrupted it — icons duplicated on some rebuilds and whole modules'
+// symbols stopped appearing once the consumer deduped downstream.
 func (s *Sprite) Merge(other *Sprite) *Sprite {
-	if other == nil {
-		return s
-	}
-	if s == nil {
-		return other
-	}
-	s.icons = append(s.icons, other.icons...)
-	return s
+	return MergeAll(s, other)
 }
 
-// String renders the sprite as inline SVG with all <symbol> elements.
+// String renders the sprite as inline SVG with all <symbol> elements. A sprite
+// with zero icons renders EmptyWrapper, not an empty string: the document that
+// injects it needs a stable insertion point. A nil sprite renders "" — there is
+// no sprite to speak of.
 func (s *Sprite) String() string {
-	if s == nil || len(s.icons) == 0 {
+	if s == nil {
 		return ""
+	}
+	if len(s.icons) == 0 {
+		return EmptyWrapper
 	}
 	var b fmt.Builder
 	b.WriteString("<svg aria-hidden=\"true\" style=\"display:none\">")
