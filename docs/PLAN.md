@@ -2,7 +2,7 @@
 PLAN: "fix: sprite.Merge no deduplica ni respeta al receptor; String() pierde el envoltorio"
 EXECUTOR: jules
 REVIEWER: none
-STATUS: running
+STATUS: done
 SESSION: 2188326099226198193
 ---
 
