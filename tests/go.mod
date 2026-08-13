@@ -6,7 +6,7 @@ require (
 	github.com/tinywasm/dom v0.13.5
 	github.com/tinywasm/fmt v0.25.5
 	github.com/tinywasm/html v0.0.6
-	github.com/tinywasm/svg v0.1.20
+	github.com/tinywasm/svg v0.1.21
 )
 
 replace github.com/tinywasm/svg => ../
