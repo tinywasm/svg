@@ -17,7 +17,14 @@ const EmptyWrapper = `<svg aria-hidden="true" style="display:none"></svg>`
 // nil entries are ignored. The result is always a fresh, non-nil *Sprite: no
 // argument is mutated and no argument's pointer is returned.
 func MergeAll(sprites ...*Sprite) *Sprite {
-	seen := make(map[string]bool)
+	// Estimate the capacity to minimize map re-allocations during deduplication.
+	var totalCount int
+	for _, s := range sprites {
+		if s != nil {
+			totalCount += len(s.icons)
+		}
+	}
+	seen := make(map[string]bool, totalCount)
 	var deduped []Definition
 
 	for _, s := range sprites {
@@ -56,9 +63,9 @@ func (s *Sprite) IDs() []string {
 	if s == nil {
 		return nil
 	}
-	out := make([]string, 0, len(s.icons))
-	for _, def := range s.icons {
-		out = append(out, def.Icon.ID())
+	out := make([]string, len(s.icons))
+	for i, def := range s.icons {
+		out[i] = def.Icon.ID()
 	}
 	return out
 }

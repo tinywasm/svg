@@ -2,8 +2,9 @@
 PLAN: "fix: sprite.Merge no deduplica ni respeta al receptor; String() pierde el envoltorio"
 EXECUTOR: jules
 REVIEWER: none
-STATUS: running
+STATUS: review
 SESSION: 2188326099226198193
+PR: https://github.com/tinywasm/svg/pull/6
 ---
 
 > Este plan se despacha con el flujo CodeJob. Ver skill: agents-workflow.
