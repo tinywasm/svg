@@ -1,6 +1,8 @@
 ---
 PLAN: "fix!: quitar Sprite.Merge — un resultado que se puede descartar en silencio"
 TAG: v0.2.0
+STATUS: running
+SESSION: 14079030100468604331
 ---
 
 > Este plan se despacha con el flujo CodeJob. Ver skill: agents-workflow.
