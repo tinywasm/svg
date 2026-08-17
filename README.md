@@ -189,7 +189,7 @@ tagged `svg.go`).
 ## Internal
 
 - `Sprite` keeps its internal representation (`iconEntry{id, content,
-  viewBox}`) and methods `String()`, `MarshalJSON`/`UnmarshalJSON`, `Merge()`
+  viewBox}`) and methods `String()`, `MarshalJSON`/`UnmarshalJSON`
   unchanged — assetmin continues to inject `Sprite.String()` inline in
   `<body>` and serialize by JSON during SSR extraction. `Define` and
   `NewSprite` just construct that same data with compile-time safety.

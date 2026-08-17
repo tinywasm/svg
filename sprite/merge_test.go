@@ -18,7 +18,7 @@ func TestMergeDeduplicatesKeepingFirst(t *testing.T) {
 	a := spriteWith("home", "user")
 	b := spriteWith("user", "gear")
 
-	got := a.Merge(b).IDs()
+	got := MergeAll(a, b).IDs()
 	want := []string{"home", "user", "gear"}
 
 	if len(got) != len(want) {
@@ -37,7 +37,7 @@ func TestMergeDoesNotMutateOperands(t *testing.T) {
 	a := spriteWith("home", "user")
 	b := spriteWith("gear")
 
-	_ = a.Merge(b)
+	_ = MergeAll(a, b)
 
 	if a.Len() != 2 {
 		t.Errorf("Merge mutated the receiver: expected 2 icons, got %d", a.Len())
@@ -53,7 +53,7 @@ func TestMergeDoesNotMutateOperands(t *testing.T) {
 func TestMergeOnNilReceiverDoesNotAlias(t *testing.T) {
 	b := spriteWith("gear")
 
-	got := (*Sprite)(nil).Merge(b)
+	got := MergeAll(nil, b)
 
 	if got == b {
 		t.Fatal("Merge returned the argument's pointer; the caller can now corrupt a cached sprite")
@@ -61,6 +61,24 @@ func TestMergeOnNilReceiverDoesNotAlias(t *testing.T) {
 	got.AddRaw("extra", "<path/>", "0 0 24 24")
 	if b.Len() != 1 {
 		t.Errorf("mutating the result changed the argument: expected 1 icon, got %d", b.Len())
+	}
+}
+
+// TestMergeAllIsTheOnlyCombiner fija la razón de que Sprite.Merge no exista.
+// Era una función pura con forma de método: x.Merge(y) compila como sentencia
+// y tira el resultado sin aviso. Esa exacta llamada, en tinywasm/sitec, dejó
+// el sprite vacío y con él todos los iconos del ecosistema.
+func TestMergeAllIsTheOnlyCombiner(t *testing.T) {
+	a := NewSprite(Define("a", "0 0 1 1", Path("M0 0")))
+	b := NewSprite(Define("b", "0 0 1 1", Path("M1 1")))
+
+	got := MergeAll(a, b)
+
+	if got.Len() != 2 {
+		t.Fatalf("MergeAll debe combinar ambos, obtuve %d", got.Len())
+	}
+	if a.Len() != 1 || b.Len() != 1 {
+		t.Errorf("MergeAll no debe mutar sus argumentos: a=%d b=%d", a.Len(), b.Len())
 	}
 }
 
