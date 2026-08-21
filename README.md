@@ -6,7 +6,7 @@ only the icon's *name* ever reaches the WASM binary.
 
 ## Overview
 
-Two packages, two audiences:
+Two packages, two audiences — plus a third for untrusted files:
 
 - **`github.com/tinywasm/svg`** — the icon **reference**. `type Icon string` +
   `Render()`. Safe to import from ANY file, including one compiled into the
@@ -16,12 +16,25 @@ Two packages, two audiences:
   viewBox, `<symbol>` markup, JSON serialization). Only backend code should
   import it: your own `svg.go` tagged `//go:build !wasm`, plus
   `tinywasm/ssr` (SSR extractor) and `assetmin`, which need it unconditionally.
+  **Sólo para iconos de confianza escritos por desarrolladores del repo.**
+- **`github.com/tinywasm/svg/sanitize`** — limpia SVG de terceros (`//go:build !wasm`).
+  Lista blanca + rechazos (`<script>`, `on*`, `<foreignObject>`). **Sólo para
+  archivos subidos por desconocidos — nunca uses `sprite` para leer un archivo
+  de un tercero.**
+
+| Package | Build | Para qué |
+|---|---|---|
+| `github.com/tinywasm/svg` | — | referencia `Icon` + `Render()` |
+| `github.com/tinywasm/svg/sprite` | — (consumer taggeado `!wasm`) | iconos de confianza — `Define`/`Path`/`Sprite` |
+| `github.com/tinywasm/svg/sanitize` | `//go:build !wasm` | limpia SVG de terceros — `Clean` |
 
 Why split by package instead of a build tag inside this library: `tinywasm/ssr`
 and `assetmin` are backend-only programs that need sprite construction at ALL
 times — a tag *inside* this library can't express "always needed by this one
 backend consumer." So the library stays untagged and minimal; **you, the
 consumer, choose what to import and tag your own files accordingly.**
+`sanitize` sí lleva `//go:build !wasm` porque con `encoding/xml` dentro
+engordaría el binario WASM cientos de KB.
 
 Each project declares its own icons — no central icon package. Icons are
 project-specific.
@@ -144,6 +157,22 @@ func NewSprite(symbols ...Symbol) *Sprite
 ```
 
 Constructs a `*Sprite` from typed definitions. The only way to build a sprite.
+
+### `svg/sanitize` package — `//go:build !wasm`
+
+Sólo para SVG de terceros. No reutilices `sprite` (búsqueda de strings para
+`viewBox`) para leer lo que subió un desconocido: ese camino mezcla confianza
+y termina colando `<script>`.
+
+#### `Clean`
+
+```go
+func Clean(src []byte) ([]byte, error)
+```
+
+Devuelve el SVG sin nada ejecutable ni que salga a la red. Rechaza (`<script>`,
+`on*`, `<foreignObject>`) y elimina por lista blanca el resto (`<style>`,
+atributos desconocidos, `href` externo, `javascript:`). Idempotente.
 
 ## Color: currentColor
 

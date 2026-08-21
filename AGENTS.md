@@ -24,11 +24,14 @@ decides what to import, and tags its OWN files.
 | Package | Contains | Who imports it |
 |---|---|---|
 | `github.com/tinywasm/svg` | `type Icon string` + `Render()`. Imports only `tinywasm/dom`. | Everyone — reachable from WASM |
-| `github.com/tinywasm/svg/sprite` | `Define`, `Sprite`, `Path`, `Raw`, `NewSprite`, `AddRaw`, `AddFile`, JSON (de)serialization. Imports `svg` + `github.com/tinywasm/json` + `github.com/tinywasm/model`. | Backend-only: a consumer's tagged `svg.go`, `tinywasm/ssr`, `assetmin` |
+| `github.com/tinywasm/svg/sprite` | `Define`, `Sprite`, `Path`, `Raw`, `NewSprite`, `AddRaw`, `AddFile`, JSON (de)serialization. Imports `svg` + `github.com/tinywasm/json` + `github.com/tinywasm/model`. | Backend-only: a consumer's tagged `svg.go`, `tinywasm/ssr`, `assetmin`. **Sólo iconos de confianza** |
+| `github.com/tinywasm/svg/sanitize` | `Clean` (`//go:build !wasm`). Imports `encoding/xml` + `github.com/tinywasm/fmt`. | Backend-only: limpieza de SVG subidos por terceros (ej. `veltylabs/misitio`). **Nunca usar `sprite` (`viewBoxOf`/`innerOf`) para leer lo que subió un desconocido — ese lector rápido es para iconos de confianza y colaría `<script>`** |
 
 Never move `sprite`'s declarations into the root `svg` package, and never make
 the root package depend on `sprite` (dependency points one way: `sprite` →
-`svg`).
+`svg`). `sanitize` no depende de `sprite` ni del paquete raíz — son dos
+caminos separados: `sprite` para iconos de confianza, `sanitize` para archivos
+de terceros.
 
 ## The two halves of an icon (consumer side)
 

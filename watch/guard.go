@@ -29,9 +29,9 @@ func New() *LeakGuard {
 	return &LeakGuard{cache: make(map[string]fileCheckCache)}
 }
 
-func (g *LeakGuard) SupportedExtensions() []string    { return []string{".go"} }
-func (g *LeakGuard) UnobservedFiles() []string          { return nil }
-func (g *LeakGuard) MainInputFileRelativePath() string  { return "" }
+func (g *LeakGuard) SupportedExtensions() []string     { return []string{".go"} }
+func (g *LeakGuard) UnobservedFiles() []string         { return nil }
+func (g *LeakGuard) MainInputFileRelativePath() string { return "" }
 
 func (g *LeakGuard) NewFileEvent(fileName, extension, filePath, event string) error {
 	if fileName != watchedFileName {
