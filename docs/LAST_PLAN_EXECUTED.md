@@ -16,7 +16,7 @@ REVIEWER: none
 **Requisito previo**, porque este entorno no lo trae instalado:
 
 ```bash
-go install github.com/tinywasm/devflow/cmd/gotest@latest
+go install webtyp.com/devflow/cmd/gotest@latest
 ```
 
 ## 1. El problema, con el caso real que lo destapó
@@ -68,7 +68,7 @@ func Clean(src []byte) ([]byte, error)
 | un atributo `on*` (`onload`, `onclick`, …) | lo mismo |
 | `<foreignObject>` | mete HTML arbitrario dentro del SVG; nada legítimo en un logo lo necesita |
 
-Errores textuales, con `github.com/tinywasm/fmt`:
+Errores textuales, con `webtyp.com/fmt`:
 
 ```
 svg: el archivo contiene <script>: un logo no ejecuta codigo
@@ -162,7 +162,7 @@ Ningún documento debe citar `docs/PLAN.md`: este archivo se borra al publicar.
 - [ ] `head -1 sanitize/*.go` → todos empiezan con `//go:build !wasm`.
 - [ ] `grep -rn "encoding/xml" --include=*.go . | grep -v sanitize/ | grep -v tests/` → vacío: el parser no se filtra al resto del repo.
 - [ ] `grep -rn "sanitize" sprite/ icon.go` → vacío: los dos caminos no se tocan.
-- [ ] `go.mod` **sin dependencias nuevas**: todo es stdlib más `tinywasm/fmt`.
+- [ ] `go.mod` **sin dependencias nuevas**: todo es stdlib más `webtyp/fmt`.
 - [ ] Los nueve tests de §3 existen y pasan.
 
 ## 6. Anti-footguns
@@ -172,7 +172,7 @@ Ningún documento debe citar `docs/PLAN.md`: este archivo se borra al publicar.
 2. **No conviertas esto en un validador de dibujos.** No comprueba que el SVG se
    vea bien, ni que tenga `viewBox`, ni que sea cuadrado. Sólo quita lo que
    ejecuta o sale a la red. Las medidas del logo las valida
-   `github.com/tinywasm/image/favicon`.
+   `webtyp.com/image/favicon`.
 3. **No uses una lista negra.** Enumerar lo prohibido deja fuera lo que se
    invente mañana; la lista blanca de §2.2 deja fuera todo lo que no esté
    escrito. Si un logo legítimo pierde algo, se agrega a la lista con su caso de

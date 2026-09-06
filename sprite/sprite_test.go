@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tinywasm/svg"
-	"github.com/tinywasm/svg/sprite"
+	"webtyp.com/svg"
+	"webtyp.com/svg/sprite"
 )
 
 func TestSprite_String(t *testing.T) {

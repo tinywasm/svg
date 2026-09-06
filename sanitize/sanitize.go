@@ -8,7 +8,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/tinywasm/fmt"
+	"webtyp.com/fmt"
 )
 
 var allowedElements = []string{

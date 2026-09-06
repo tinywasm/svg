@@ -5,10 +5,10 @@ package svg_test
 import (
 	"testing"
 
-	"github.com/tinywasm/dom"
-	"github.com/tinywasm/fmt"
-	. "github.com/tinywasm/html"
-	"github.com/tinywasm/svg"
+	"webtyp.com/dom"
+	"webtyp.com/fmt"
+	. "webtyp.com/html"
+	"webtyp.com/svg"
 )
 
 type SearchOption struct {

@@ -1,7 +1,7 @@
 package svg
 
 import (
-	"github.com/tinywasm/dom"
+	"webtyp.com/dom"
 )
 
 // Icon is a typed icon reference (the symbol ID).

@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tinywasm/svg/watch"
+	"webtyp.com/svg/watch"
 )
 
 func TestLeakGuard(t *testing.T) {
@@ -16,7 +16,7 @@ func TestLeakGuard(t *testing.T) {
 		g := watch.New()
 		path := filepath.Join(tmp, "svg.go")
 		content := `package main
-import "github.com/tinywasm/svg/sprite"
+import "webtyp.com/svg/sprite"
 `
 		os.WriteFile(path, []byte(content), 0644)
 		err := g.NewFileEvent("svg.go", ".go", path, "save")
@@ -30,7 +30,7 @@ import "github.com/tinywasm/svg/sprite"
 		path := filepath.Join(tmp, "svg.go")
 		content := `//go:build !wasm
 package main
-import "github.com/tinywasm/svg/sprite"
+import "webtyp.com/svg/sprite"
 `
 		os.WriteFile(path, []byte(content), 0644)
 		err := g.NewFileEvent("svg.go", ".go", path, "save")
@@ -43,7 +43,7 @@ import "github.com/tinywasm/svg/sprite"
 		g := watch.New()
 		path := filepath.Join(tmp, "svg.go")
 		content := `package main
-import "github.com/tinywasm/svg"
+import "webtyp.com/svg"
 `
 		os.WriteFile(path, []byte(content), 0644)
 		err := g.NewFileEvent("svg.go", ".go", path, "save")
@@ -56,7 +56,7 @@ import "github.com/tinywasm/svg"
 		g := watch.New()
 		path := filepath.Join(tmp, "main.go")
 		content := `package main
-import "github.com/tinywasm/svg/sprite"
+import "webtyp.com/svg/sprite"
 `
 		os.WriteFile(path, []byte(content), 0644)
 		err := g.NewFileEvent("main.go", ".go", path, "save")
@@ -69,7 +69,7 @@ import "github.com/tinywasm/svg/sprite"
 		g := watch.New()
 		path := filepath.Join(tmp, "svg.go")
 		content := `package main
-import "github.com/tinywasm/svg/sprite"
+import "webtyp.com/svg/sprite"
 `
 		os.WriteFile(path, []byte(content), 0644)
 		// Set a specific mtime
@@ -82,7 +82,7 @@ import "github.com/tinywasm/svg/sprite"
 		}
 
 		// Change file content but keep mtime same (force cache hit)
-		os.WriteFile(path, []byte("//go:build !wasm\npackage main\nimport \"github.com/tinywasm/svg/sprite\""), 0644)
+		os.WriteFile(path, []byte("//go:build !wasm\npackage main\nimport \"webtyp.com/svg/sprite\""), 0644)
 		os.Chtimes(path, mtime, mtime)
 
 		err2 := g.NewFileEvent("svg.go", ".go", path, "save")

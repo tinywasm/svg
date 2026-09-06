@@ -1,10 +1,10 @@
 package sprite
 
 import (
-	"github.com/tinywasm/fmt"
-	"github.com/tinywasm/json"
-	"github.com/tinywasm/model"
-	"github.com/tinywasm/svg"
+	"webtyp.com/fmt"
+	"webtyp.com/json"
+	"webtyp.com/model"
+	"webtyp.com/svg"
 )
 
 // Node is internal typed markup for a symbol's body.
@@ -89,7 +89,7 @@ func (s *Sprite) String() string {
 	return b.String()
 }
 
-// Encodable/Decodable implementation using github.com/tinywasm/json
+// Encodable/Decodable implementation using webtyp.com/json
 
 // IsNil reports whether the sprite is nil.
 func (s *Sprite) IsNil() bool {
@@ -102,7 +102,7 @@ func (s *Sprite) EncodeFields(w model.FieldWriter) {}
 // DecodeFields decodes the sprite fields.
 func (s *Sprite) DecodeFields(r model.FieldReader) {}
 
-// MarshalJSON serializes the Sprite to JSON using tinywasm/json.
+// MarshalJSON serializes the Sprite to JSON using webtyp/json.
 func (s *Sprite) MarshalJSON() ([]byte, error) {
 	if s == nil {
 		return []byte("null"), nil
@@ -112,7 +112,7 @@ func (s *Sprite) MarshalJSON() ([]byte, error) {
 	return out, err
 }
 
-// UnmarshalJSON deserializes the Sprite from JSON using tinywasm/json.
+// UnmarshalJSON deserializes the Sprite from JSON using webtyp/json.
 func (s *Sprite) UnmarshalJSON(b []byte) error {
 	return json.Decode(b, s)
 }

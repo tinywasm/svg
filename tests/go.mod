@@ -1,12 +1,12 @@
-module github.com/tinywasm/svg/tests
+module webtyp.com/svg/tests
 
 go 1.25.2
 
 require (
-	github.com/tinywasm/dom v0.13.9
-	github.com/tinywasm/fmt v0.25.7
-	github.com/tinywasm/html v0.0.6
-	github.com/tinywasm/svg v0.3.4
+	webtyp.com/dom v0.13.9
+	webtyp.com/fmt v0.25.7
+	webtyp.com/html v0.0.6
+	webtyp.com/svg v0.3.4
 )
 
-replace github.com/tinywasm/svg => ../
+replace webtyp.com/svg => ../

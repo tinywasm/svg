@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tinywasm/svg"
+	"webtyp.com/svg"
 )
 
 func TestIcon_Render(t *testing.T) {

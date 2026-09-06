@@ -1,18 +1,18 @@
-# Agent Guide — `tinywasm/svg`
+# Agent Guide — `webtyp/svg`
 
 Constraints for agents modifying this library. Read before any change.
 
 ---
 
-## Construction Harness — typed & explicit (the TinyWasm approach)
+## Construction Harness — typed & explicit (the WebTyp approach)
 
-This library is part of TinyWasm's **construction harness**: the typed,
+This library is part of WebTyp's **construction harness**: the typed,
 explicit API is what keeps an agent that doesn't know the library from building
-wrong code. (Ecosystem rationale: `tinywasm/app/docs/CONSTRUCTION_HARNESS.md` and
+wrong code. (Ecosystem rationale: `webtyp/app/docs/CONSTRUCTION_HARNESS.md` and
 `app/docs/CONSTRUCTION_HARNESS.md`.)
 
 **This library never uses `//go:build`.** It has two unconditional consumer
-classes — the WASM browser client, and backend-only programs (`tinywasm/ssr`'s
+classes — the WASM browser client, and backend-only programs (`webtyp/ssr`'s
 extractor, `assetmin`) that need sprite construction at all times. A tag
 inside the library cannot serve both correctly (the extractor would need to
 build the library for `!wasm` specifically, which has nothing to do with its
@@ -23,9 +23,9 @@ decides what to import, and tags its OWN files.
 
 | Package | Contains | Who imports it |
 |---|---|---|
-| `github.com/tinywasm/svg` | `type Icon string` + `Render()`. Imports only `tinywasm/dom`. | Everyone — reachable from WASM |
-| `github.com/tinywasm/svg/sprite` | `Define`, `Sprite`, `Path`, `Raw`, `NewSprite`, `AddRaw`, `AddFile`, JSON (de)serialization. Imports `svg` + `github.com/tinywasm/json` + `github.com/tinywasm/model`. | Backend-only: a consumer's tagged `svg.go`, `tinywasm/ssr`, `assetmin`. **Sólo iconos de confianza** |
-| `github.com/tinywasm/svg/sanitize` | `Clean` (`//go:build !wasm`). Imports `encoding/xml` + `github.com/tinywasm/fmt`. | Backend-only: limpieza de SVG subidos por terceros (ej. `veltylabs/misitio`). **Nunca usar `sprite` (`viewBoxOf`/`innerOf`) para leer lo que subió un desconocido — ese lector rápido es para iconos de confianza y colaría `<script>`** |
+| `webtyp.com/svg` | `type Icon string` + `Render()`. Imports only `webtyp/dom`. | Everyone — reachable from WASM |
+| `webtyp.com/svg/sprite` | `Define`, `Sprite`, `Path`, `Raw`, `NewSprite`, `AddRaw`, `AddFile`, JSON (de)serialization. Imports `svg` + `webtyp.com/json` + `webtyp.com/model`. | Backend-only: a consumer's tagged `svg.go`, `webtyp/ssr`, `assetmin`. **Sólo iconos de confianza** |
+| `webtyp.com/svg/sanitize` | `Clean` (`//go:build !wasm`). Imports `encoding/xml` + `webtyp.com/fmt`. | Backend-only: limpieza de SVG subidos por terceros (ej. `veltylabs/misitio`). **Nunca usar `sprite` (`viewBoxOf`/`innerOf`) para leer lo que subió un desconocido — ese lector rápido es para iconos de confianza y colaría `<script>`** |
 
 Never move `sprite`'s declarations into the root `svg` package, and never make
 the root package depend on `sprite` (dependency points one way: `sprite` →
@@ -41,7 +41,7 @@ de terceros.
 - **Definition (consumer's own `!wasm` file):**
   `sprite.Define(iconX, "0 0 16 16", sprite.Path("..."))` inside the
   consumer's `//go:build !wasm` `svg.go`, exposed via
-  `IconSvg() *sprite.Sprite`. `tinywasm/ssr` extracts it; `assetmin` merges
+  `IconSvg() *sprite.Sprite`. `webtyp/ssr` extracts it; `assetmin` merges
   all sprites and injects them inline at the top of `<body>` — there is no
   `/assets/icons.svg` URL; `href="#id"` always resolves without a network request.
 
@@ -57,7 +57,7 @@ library cannot prevent that by itself; it is a consumer-side responsibility.
 Every consumer AGENTS.md MUST record this mandatory pre-publish check:
 
 ```bash
-GOOS=js GOARCH=wasm go list -deps ./... | grep tinywasm/svg/sprite   # must be empty
+GOOS=js GOARCH=wasm go list -deps ./... | grep webtyp/svg/sprite   # must be empty
 ```
 
 When reviewing a consumer's `svg.go`, verify it carries `//go:build !wasm`
@@ -66,19 +66,19 @@ library's, but it is the number one mistake this design is vulnerable to.
 
 ## Hard rules
 
-- Root `svg` package (`icon.go`) imports ONLY `github.com/tinywasm/dom`. No
+- Root `svg` package (`icon.go`) imports ONLY `webtyp.com/dom`. No
   stdlib, no `sprite`.
-- `svg/sprite` serializes via `github.com/tinywasm/json` +
-  `github.com/tinywasm/model` (`Encodable`/`Decodable`, plus `FielderSlice`
+- `svg/sprite` serializes via `webtyp.com/json` +
+  `webtyp.com/model` (`Encodable`/`Decodable`, plus `FielderSlice`
   for the bare-array wire shape `Sprite` needs). **Never** import stdlib
-  `encoding/json` here — `tinywasm/json` is faster (no reflection, reused
+  `encoding/json` here — `webtyp/json` is faster (no reflection, reused
   buffers) and it's the codec the ecosystem's own tests actually exercise, so
   using anything else means this package's serialization bugs go undetected
   by every other test that proves the codec correct. `Sprite` keeps
   `MarshalJSON`/`UnmarshalJSON` method NAMES (stdlib-compatible signatures)
-  only because `tinywasm/ssr`'s outer envelope decode
+  only because `webtyp/ssr`'s outer envelope decode
   (legitimately `encoding/json`, backend tooling) needs to find them by
-  interface — their BODIES delegate entirely to `tinywasm/json.Encode`/`Decode`.
+  interface — their BODIES delegate entirely to `webtyp/json.Encode`/`Decode`.
 - No `map`, no generics, no `any`. Value semantics; unexported struct fields.
 - `Path(d)` hardcodes `fill="currentColor"` — icons are color-agnostic; theming
   happens in CSS at the use-site. Never emit fixed colors.

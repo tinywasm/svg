@@ -66,7 +66,7 @@ func TestMergeOnNilReceiverDoesNotAlias(t *testing.T) {
 
 // TestMergeAllIsTheOnlyCombiner fija la razón de que Sprite.Merge no exista.
 // Era una función pura con forma de método: x.Merge(y) compila como sentencia
-// y tira el resultado sin aviso. Esa exacta llamada, en tinywasm/sitec, dejó
+// y tira el resultado sin aviso. Esa exacta llamada, en webtyp/sitec, dejó
 // el sprite vacío y con él todos los iconos del ecosistema.
 func TestMergeAllIsTheOnlyCombiner(t *testing.T) {
 	a := NewSprite(Define("a", "0 0 1 1", Path("M0 0")))

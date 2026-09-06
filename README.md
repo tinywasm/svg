@@ -1,34 +1,34 @@
 # svg
 <img src="docs/img/badges.svg">
 
-SVG icon sprite API for TinyWasm — typed, zero-typo icon definitions, split so
+SVG icon sprite API for WebTyp — typed, zero-typo icon definitions, split so
 only the icon's *name* ever reaches the WASM binary.
 
 ## Overview
 
 Two packages, two audiences — plus a third for untrusted files:
 
-- **`github.com/tinywasm/svg`** — the icon **reference**. `type Icon string` +
+- **`webtyp.com/svg`** — the icon **reference**. `type Icon string` +
   `Render()`. Safe to import from ANY file, including one compiled into the
   browser bundle. This package never uses `//go:build` — it has nothing to
   hide from any target.
-- **`github.com/tinywasm/svg/sprite`** — the icon **definition** (paths,
+- **`webtyp.com/svg/sprite`** — the icon **definition** (paths,
   viewBox, `<symbol>` markup, JSON serialization). Only backend code should
   import it: your own `svg.go` tagged `//go:build !wasm`, plus
-  `tinywasm/ssr` (SSR extractor) and `assetmin`, which need it unconditionally.
+  `webtyp/ssr` (SSR extractor) and `assetmin`, which need it unconditionally.
   **Sólo para iconos de confianza escritos por desarrolladores del repo.**
-- **`github.com/tinywasm/svg/sanitize`** — limpia SVG de terceros (`//go:build !wasm`).
+- **`webtyp.com/svg/sanitize`** — limpia SVG de terceros (`//go:build !wasm`).
   Lista blanca + rechazos (`<script>`, `on*`, `<foreignObject>`). **Sólo para
   archivos subidos por desconocidos — nunca uses `sprite` para leer un archivo
   de un tercero.**
 
 | Package | Build | Para qué |
 |---|---|---|
-| `github.com/tinywasm/svg` | — | referencia `Icon` + `Render()` |
-| `github.com/tinywasm/svg/sprite` | — (consumer taggeado `!wasm`) | iconos de confianza — `Define`/`Path`/`Sprite` |
-| `github.com/tinywasm/svg/sanitize` | `//go:build !wasm` | limpia SVG de terceros — `Clean` |
+| `webtyp.com/svg` | — | referencia `Icon` + `Render()` |
+| `webtyp.com/svg/sprite` | — (consumer taggeado `!wasm`) | iconos de confianza — `Define`/`Path`/`Sprite` |
+| `webtyp.com/svg/sanitize` | `//go:build !wasm` | limpia SVG de terceros — `Clean` |
 
-Why split by package instead of a build tag inside this library: `tinywasm/ssr`
+Why split by package instead of a build tag inside this library: `webtyp/ssr`
 and `assetmin` are backend-only programs that need sprite construction at ALL
 times — a tag *inside* this library can't express "always needed by this one
 backend consumer." So the library stays untagged and minimal; **you, the
@@ -49,7 +49,7 @@ This is the part that reaches the WASM binary: just a name.
 // mycomponent.go — no build tag, compiles for browser AND backend
 package mycomponent
 
-import "github.com/tinywasm/svg"
+import "webtyp.com/svg"
 
 const iconStar = svg.Icon("mycomponent-star") // just a string; nothing else ships to WASM
 ```
@@ -63,7 +63,7 @@ this library does not and cannot add it for you.
 //go:build !wasm
 package mycomponent
 
-import "github.com/tinywasm/svg/sprite"
+import "webtyp.com/svg/sprite"
 
 func (c *MyComponent) IconSvg() *sprite.Sprite {
 	return sprite.NewSprite(
@@ -78,14 +78,14 @@ func (c *MyComponent) IconSvg() *sprite.Sprite {
 identifier shared by definition and reference. A typo or rename breaks the
 build in both places at once.
 
-You never call `IconSvg()` yourself. The `tinywasm` framework does it
-automatically as part of its build pipeline: `tinywasm/ssr` extracts it during
+You never call `IconSvg()` yourself. The `webtyp` framework does it
+automatically as part of its build pipeline: `webtyp/ssr` extracts it during
 SSR and `assetmin` merges every component's sprite into one block and injects
 it inline at the top of `<body>`. There is no `/assets/icons.svg` URL —
 `href="#id"` always resolves without a network request.
 
 For how that pipeline runs (dev server, hot-reload, installation), see
-[`tinywasm/app`](https://github.com/tinywasm/app) — that's the framework
+[`webtyp/app`](https://github.com/webtyp/app) — that's the framework
 entry point, not this library.
 
 ### 3. Reference the icon in `Render()` — same shared file as step 1
@@ -98,7 +98,7 @@ func (c *MyComponent) Render() *dom.Element {
 }
 ```
 
-`clsIcon` is a typed `Class` var from `tinywasm/css` — converted to `string`
+`clsIcon` is a typed `Class` var from `webtyp/css` — converted to `string`
 because `Render` accepts `...string`. If `clsIcon` is renamed in CSS, the
 compiler warns here too.
 
@@ -202,13 +202,13 @@ successfully** and silently ships path data + `encoding/json` into the WASM
 binary. There is no compiler error to catch it.
 
 This manual check is now automated during development via
-`svg/watch.LeakGuard`, registered in `tinywasm/app`'s hot-reload (see
+`svg/watch.LeakGuard`, registered in `webtyp/app`'s hot-reload (see
 `app/docs/PLAN_SVG_LEAK_GUARD.md`) — the manual `go list -deps` command
 remains documented as the CI/pre-publish fallback for environments without
 the watcher running.
 
 ```bash
-GOOS=js GOARCH=wasm go list -deps ./... | grep tinywasm/svg/sprite
+GOOS=js GOARCH=wasm go list -deps ./... | grep webtyp/svg/sprite
 ```
 
 Empty output = safe. Any output = some file without `//go:build !wasm` is

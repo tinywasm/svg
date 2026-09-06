@@ -9,10 +9,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/tinywasm/fmt"
+	"webtyp.com/fmt"
 )
 
-const spriteImportPath = "github.com/tinywasm/svg/sprite"
+const spriteImportPath = "webtyp.com/svg/sprite"
 const watchedFileName = "svg.go"
 
 type fileCheckCache struct {

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tinywasm/svg/sanitize"
+	"webtyp.com/svg/sanitize"
 )
 
 func TestCleanRejectsScript(t *testing.T) {

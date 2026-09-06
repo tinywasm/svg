@@ -1,6 +1,6 @@
 package sprite
 
-import "github.com/tinywasm/fmt"
+import "webtyp.com/fmt"
 
 // AddFile adds a whole .svg file (as read from disk) to the sprite as a <symbol>.
 // The viewBox is taken from the file's root <svg> element, and only its inner
